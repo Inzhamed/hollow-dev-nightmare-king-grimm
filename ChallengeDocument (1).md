@@ -10,4 +10,4 @@
 ### Requirements
 
 - Implement an account system for user registration and
-authentication. 100%
+authentication. 100%.
