@@ -7,6 +7,9 @@ const initializePassport = require("./config/passport-config");
 const flash = require("express-flash");
 const session = require("express-session");
 const methodOverride = require("method-override");
+const http = require("http");
+const socketIo = require("socket.io");
+
 const app = express();
 const PORT = 3000;
 
@@ -39,10 +42,42 @@ app.use(methodOverride("_method"));
 const authRoutes = require("./routes/authRoutes");
 app.use("/", authRoutes);
 
+// Socket.io setup
+const server = http.createServer(app);
+const io = socketIo(server);
+
+io.on('connection', socket => {
+  console.log('New WS Connection...');
+
+  socket.on('chatMessage', msg => {
+    io.emit('message', msg);
+  });
+
+  socket.on('offer', (offer) => {
+    socket.broadcast.emit('offer', offer);
+  });
+
+  socket.on('answer', (answer) => {
+    socket.broadcast.emit('answer', answer);
+  });
+
+  socket.on('candidate', (candidate) => {
+    socket.broadcast.emit('candidate', candidate);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User has left');
+  });
+});
+
+// Routes for meetings
+const meetingRoutes = require('./routes/meeting');
+app.use('/meetings', meetingRoutes);
+
 // Start server
 async function start() {
   await connectDB();
-  app.listen(PORT, () => {
+  server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 }
