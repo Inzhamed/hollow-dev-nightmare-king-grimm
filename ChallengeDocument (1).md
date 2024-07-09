@@ -11,5 +11,3 @@
 
 - Implement an account system for user registration and
 authentication. 100%
-
-
